@@ -1,4 +1,4 @@
-package dto;
+package com.fitness.userservice.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;

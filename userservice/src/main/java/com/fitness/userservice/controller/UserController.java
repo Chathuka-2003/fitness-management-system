@@ -1,17 +1,21 @@
-package controller;
+package com.fitness.userservice.controller;
 
-import dto.RegisterRequest;
-import dto.UserResponse;
+import com.fitness.userservice.dto.RegisterRequest;
+import com.fitness.userservice.dto.UserResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import service.UserService;
+import com.fitness.userservice.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
+    
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {

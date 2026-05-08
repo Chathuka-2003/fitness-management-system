@@ -1,4 +1,4 @@
-package userservice;
+package com.fitness.userservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
