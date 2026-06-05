@@ -3,12 +3,14 @@ package com.fitness.userservice.service;
 import com.fitness.userservice.dto.RegisterRequest;
 import com.fitness.userservice.dto.UserResponse;
 import com.fitness.userservice.model.User;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.fitness.userservice.repository.UserRepository;
 
 @Service
+@Slf4j
 public class UserService {
 
     @Autowired
@@ -17,17 +19,35 @@ public class UserService {
     public UserResponse registerUser(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            User existingUser = userRepository.findByEmail(request.getEmail());
+
+            // ✅ Update keycloakId if it was null before
+            if (existingUser.getKeycloakId() == null && request.getKeycloakId() != null) {
+                existingUser.setKeycloakId(request.getKeycloakId());
+                existingUser = userRepository.save(existingUser); // ✅ persist the update
+            }
+
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(existingUser.getId());
+            userResponse.setKeycloakId(existingUser.getKeycloakId());
+            userResponse.setEmail(existingUser.getEmail());
+            userResponse.setFirstName(existingUser.getFirstName());
+            userResponse.setLastName(existingUser.getLastName());
+            userResponse.setCreatedAt(existingUser.getCreatedAt());
+            userResponse.setUpdatedAt(existingUser.getUpdatedAt());
+            return userResponse;
         }
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
+        user.setKeycloakId(request.getKeycloakId());
         // Save user to database and return response
         User savedUser = userRepository.save(user);
         UserResponse userResponse = new UserResponse();
         userResponse.setId(savedUser.getId());
+        userResponse.setKeycloakId(savedUser.getKeycloakId());
         userResponse.setEmail(savedUser.getEmail());
         userResponse.setFirstName(savedUser.getFirstName());
         userResponse.setLastName(savedUser.getLastName());
@@ -48,5 +68,10 @@ public class UserService {
         userResponse.setCreatedAt(user.getCreatedAt());
         userResponse.setUpdatedAt(user.getUpdatedAt());
         return userResponse;
+    }
+
+    public Boolean existByUserId(String userId) {
+        log.info("Calling User Validation API for userId: {}", userId);
+        return userRepository.existsByKeycloakId(userId);
     }
 }
